@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+	<head>
+    <META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=UTF-8">
+		<title>Marcell Jusztin - Yahoo Finance Demo</title>
+		<meta name="keywords" content="jquery, yql, yahoo, finance api, stock market, currency, stock quotes, javascript, ajax" />
+  	<meta name="description" content="Retreive Stock Market Quotes by using jQuery and Yahoo!'s YQL" />
+  	<meta name="author" content="Marcell Jusztin, http://marcelljusztin.com" />
+    
+		<style>
+		  
+		  * { margin:0; padding: 0;}
+		  
+		  body {
+		    font-family: Helvetica, Verdana;
+		    font-size: 12px;
+		    background: #DDD;
+		  }
+		  
+		  div.container {
+		    background: #DDD;
+		    color: #333;
+		    border: 2px solid #999;
+		    border-radius: 5px;
+		    width: 600px;
+		    margin: 10px auto;
+		    padding: 20px;
+		    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+		  }
+		  
+		  h1 {
+		    margin: 5px 0px;
+		    border-bottom: 1px solid #AAA;
+		    font-family: Helvetica, Verdana;
+		  }
+		  
+		  table {
+		    border: 0;
+		  }
+		  
+		  td {
+		    padding: 5px 10px;
+		  }
+		  
+		  thead td {
+		    font-weight: bold;
+		    text-shadow: 0px 1px 1px #FFF;
+		  }
+		  
+		  tbody td {
+		    font-family: Monaco, 'Courier New', mono;
+		  }
+		  
+		  a.button {
+		    text-decoration: none;
+		    font-weight: bold;
+		    font-size: 0.4em;
+		    display: block;
+		    float: right;
+		    padding: 5px;
+		    background: rgb(79,133,187);
+		    color: #FFF;
+		    border: 1px solid #111;
+		  }
+      #response-source {
+        width: 550px;
+      }
+		</style>
+	</head>
+	<body>
+	
+	 <div class = "container">
+	   <h1 style="border-bottom: 0;"><img src="yql.png" alt = "" style="height: 40px; float: left; width: 25px;"/> YQL Finance Demo</h1>
+	 </div>
+	
+	 <div class = "container">
+	   <h1>Quotes <a href = "javascript:void(0);" class = "button" id = "quote-button">Click Me</a></h1>
+	 
+    <table>
+      <thead>
+        <tr>
+          <td>Symbol</td>
+          <td>Name</td>
+          <td>Ask</td>
+          <td>Bid</td>
+          <td>Change</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="AAPL-symbol"></td>
+          <td id="AAPL-name"></td>
+          <td id="AAPL-ask"></td>
+          <td id="AAPL-bid"></td>
+          <td id="AAPL-change"></td>
+        </tr>
+        <tr>
+          <td id="GOOG-symbol"></td>
+          <td id="GOOG-name"></td>
+          <td id="GOOG-ask"></td>
+          <td id="GOOG-bid"></td>
+          <td id="GOOG-change"></td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <h1>Exchange Rates <a href = "javascript:void(0);" class = "button" id = "exchange-button">Click Me</a></h1>
+    
+    <table>
+      <thead>
+        <tr>
+          <td>Currency Pair</td>
+          <td>Rate</td>
+          <td>Ask</td>
+          <td>Bid</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="EURUSD-name"></td>
+          <td id="EURUSD-rate"></td>
+          <td id="EURUSD-ask"></td>
+          <td id="EURUSD-bid"></td>
+        </tr>
+        <tr>
+          <td id="USDCAD-name"></td>
+          <td id="USDCAD-rate"></td>
+          <td id="USDCAD-ask"></td>
+          <td id="USDCAD-bid"></td>
+        </tr>
+      </tbody>
+    </table>
+
+	 </div>
+	 
+	 <div class = "container">
+	   
+	   <h1>Raw JSON Response</h1>
+	   <pre id = "response-source"></pre>
+	   
+	 </div>
+	
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script type="text/javascript">
+      jQuery(document).ready(
+        function(){
+        
+          // Code formating. Similar to PHP's print_r function.
+          var print = function(o){
+              var str='';
+
+              for(var p in o){
+                  if(typeof o[p] == 'string'){
+                      str+= p + ': ' + o[p]+'; </br>';
+                  }else{
+                      str+= p + ': { </br>' + print(o[p]) + '}';
+                  }
+              }
+
+              return str;
+          }
+
+          // Main Query Handler function. Accepts a query string and a callback function.
+          function YQLRequest( queryString, callback ){
+            var url = "http://query.yahooapis.com/v1/public/yql?q=" + queryString + "&format=json&env=http://datatables.org/alltables.env&callback=?";
+            jQuery.getJSON(url, callback);
+          }
+          
+          // Exchange Rate query
+          function getExchangeRates(){
+            var q = escape( 'select * from yahoo.finance.xchange where pair in ("EURUSD","USDCAD")' );
+            YQLRequest( q, processExchangeRates );
+          }         
+
+          // Callback function for Exchange Rates
+          function processExchangeRates( data ){
+            var rates = data.query.results.rate;
+            // The code below is optional, do whatever you like with the data.
+            jQuery("#response-source").html(print(data));
+            for(var r in rates){
+              jQuery("#" + rates[r].id + "-name").html(rates[r].Name);
+              jQuery("#" + rates[r].id + "-rate").html(rates[r].Rate);
+              jQuery("#" + rates[r].id + "-ask").html(rates[r].Ask);
+              jQuery("#" + rates[r].id + "-bid").html(rates[r].Bid);
+            }
+          }
+
+          // Stock Quotes query
+          function getQuotes(){
+            var q = escape( 'select * from yahoo.finance.quotes where symbol in ("AAPL","GOOG")' );
+            YQLRequest( q, processQuotes );
+          }         
+
+          // Callaback function for Stock Quotes
+          function processQuotes( data ){
+            var quotes = data.query.results.quote;
+            // The code below is optional, do whatever you like with the data.
+            jQuery("#response-source").html(print(data));
+            for(var r in quotes){
+              jQuery("#" + quotes[r].symbol + "-symbol").html(quotes[r].symbol);
+              jQuery("#" + quotes[r].symbol + "-name").html(quotes[r].Name);
+              jQuery("#" + quotes[r].symbol + "-ask").html(quotes[r].Ask);
+              jQuery("#" + quotes[r].symbol + "-bid").html(quotes[r].Bid);
+              jQuery("#" + quotes[r].symbol + "-change").html(quotes[r].Change);
+            }
+          }
+  
+          // Loader events
+          jQuery("a#quote-button").click(
+            function(){
+              jQuery("#response-source").html("<img src = 'ajax-loader.gif'/>");
+              getQuotes();
+            }
+          );
+          
+          jQuery("a#exchange-button").click(
+            function(){
+              jQuery("#response-source").html("<img src = 'ajax-loader.gif'/>");
+              getExchangeRates();
+            }
+          );
+
+        }
+      );
+    </script>
+
+	</body>
+</html>
