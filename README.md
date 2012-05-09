@@ -7,8 +7,8 @@ YQL Finance is just a simple jQuery (JSONP) script to call and process stock mar
 When you work with YQL you might want to consider the following few rules and notes taken from the official site. You can find out more at the [Yahoo! Developer Network](http://developer.yahoo.com/yql/).
 
 - YQL can be used for commercial purposes
-- If we're going to shut down YQL, we will give you at least 6 months notice with an announcement on this web page and in our forum
-- <li>YQL has a performance uptime target of over 99.5%
+- If we're going to shut down YQL, we will give you at least 6 months notice with an announcement on this web page and in our forum.
+- YQL has a performance uptime target of over 99.5%
 
 ###Usage Limits
 
